@@ -88,7 +88,7 @@ def detect_motion(frameCount):
         # acquire the lock, set the output frame, and release the
         # lock
         # cv2.imshow('k', frame)
-        cv2.imshow('d', gray)
+        cv2.imshow('d', full_frame)
         if cv2.waitKey(25) & 0xFF == ord('q'):
             break
 detect_motion(32)
