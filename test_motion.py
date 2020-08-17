@@ -16,7 +16,7 @@ lock = threading.Lock()
 
 vs = VideoStream(src=0).start()
 time.sleep(2.0)
-
+saved = True
 def detect_motion(frameCount):
     # grab global references to the video stream, output frame, and
     # lock variables
@@ -42,11 +42,7 @@ def detect_motion(frameCount):
     
         frame_array.append(full_frame)
         frame_counter += 1
-        if frame_counter % 1000 == 0:
 
-                    
-            #save_video(frame_counter, frame_array)
-            frame_array = frame_array[-1000:]
 
         
         frame = imutils.resize(full_frame, width=400)
@@ -69,16 +65,7 @@ def detect_motion(frameCount):
             motion = md.detect(gray)
 
             # cehck to see if motion was found in the frame
-            if motion is not None:
-                if datetime.datetime.now() > last_motion + datetime.timedelta(seconds=2):
-                    print(total)
-                last_motion = datetime.datetime.now()
-                # unpack the tuple and draw the box surrounding the
-                # "motion area" on the output frame
-                # (thresh, (minX, minY, maxX, maxY)) = motion
-                # cv2.rectangle(frame, (minX, minY), (maxX, maxY),
-                # 	(0, 0, 255), 2)
-        
+
         # update the background model and increment the total number
         # of frames read thus far
         md.update(gray)

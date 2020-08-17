@@ -13,6 +13,7 @@ import datetime
 import imutils
 import time
 import cv2
+from message import send_message
 
 # initialize the output frame and a lock used to ensure thread-safe
 # exchanges of the output frames (useful for multiple browsers/tabs
@@ -57,7 +58,10 @@ def detect_motion(frameCount):
 
 	frame_array = []
 	frame_counter = 0
-
+	has_motion = False
+	last_motion = datetime.datetime.now()
+	waiter = 5
+	saved = True
 
 
 	# loop over frames from the video stream
@@ -68,16 +72,7 @@ def detect_motion(frameCount):
 	
 		frame_array.append(full_frame)
 		frame_counter += 1
-		if frame_counter % 1000 == 0:
-			t = threading.Thread(target=save_video, args=(
-			frame_counter, frame_array))
-			t.daemon = True
-			t.start()
-					
-			#save_video(frame_counter, frame_array)
-			frame_array = frame_array[-1000:]
 
-		print(frame_counter)
 		
 		frame = imutils.resize(full_frame, width=400)
 		gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -98,11 +93,30 @@ def detect_motion(frameCount):
 
 			# cehck to see if motion was found in the frame
 			if motion is not None:
+				if datetime.datetime.now() > last_motion + datetime.timedelta(seconds=waiter):
+					send_message(url)
+					saved = False
+				last_motion = datetime.datetime.now()
 				# unpack the tuple and draw the box surrounding the
 				# "motion area" on the output frame
-				(thresh, (minX, minY, maxX, maxY)) = motion
-				cv2.rectangle(frame, (minX, minY), (maxX, maxY),
-					(0, 0, 255), 2)
+				# (thresh, (minX, minY, maxX, maxY)) = motion
+				# cv2.rectangle(frame, (minX, minY), (maxX, maxY),
+				# 	(0, 0, 255), 2)
+			elif frame_counter % 1000 == 0:
+
+				if saved is False and datetime.datetime.now() > last_motion + datetime.timedelta(seconds=waiter):
+					print(frame_counter)
+					
+					saved = True
+					t = threading.Thread(target=save_video, args=(
+					frame_counter, frame_array))
+					t.daemon = True
+					t.start()
+				
+					frame_array = []
+					frame_counter = 0
+				else:
+					frame_array = frame_array[-1000:]   
 		
 		# update the background model and increment the total number
 		# of frames read thus far
@@ -155,6 +169,8 @@ if __name__ == '__main__':
 		help="ephemeral port number of the server (1024 to 65535)")
 	ap.add_argument("-f", "--frame-count", type=int, default=32,
 		help="# of frames used to construct the background model")
+	ap.add_argument("-url", type=str, default="None",
+		help="# of frames used to construct the background model")		
 	args = vars(ap.parse_args())
 
 	# start a thread that will perform motion detection
@@ -162,7 +178,7 @@ if __name__ == '__main__':
 		args["frame_count"],))
 	t.daemon = True
 	t.start()
-
+	url = args['url']
 	# start the flask app
 	app.run(host=args["ip"], port=args["port"], debug=True,
 		threaded=True, use_reloader=False)
