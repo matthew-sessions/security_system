@@ -3,10 +3,10 @@ import socket
 
 def Main():
 
-    host = "192.168.2.74"  # client ip
+    host = "192.168.2.31"  # client ip
     port = 4005
 
-    server = ("192.168.2.31", 4000)
+    server = ("192.168.2.74", 4000)
 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((host, port))
