@@ -4,7 +4,7 @@ import socket
 def Main():
 
     host = "192.168.3.122"  # client ip
-    port = 4005
+    port = 4000
 
     server = ("172.17.0.1", 4000)
 
