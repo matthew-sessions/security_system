@@ -3,7 +3,7 @@ import socket
 
 def Main():
 
-    host = "67.170.120.133"  # client ip
+    host = "192.168.3.122"  # client ip
     port = 4000
 
     server = ("104.140.79.132", 4000)
